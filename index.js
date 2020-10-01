@@ -4,6 +4,11 @@ const { config } = require("dotenv");
 
 const client = new Client();
 
+const fs = require('fs');
+const Discord = require('discord.js');
+client.commands = new Discord.Collection();
+const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'))
+
 //Path for token.
 config({
     path: __dirname + "/.env"
@@ -22,8 +27,14 @@ client.on("ready", () => {
     })
 });
 
-//Handles messages will be updated into command handler.
+for (const file of commandFiles){
+    const command = require(`./commands/${file}`);
+    client.commands.set(command.name, command);
+}
+
+//Handles messages
 client.on("message", async message => {
+
     //Prefix for all commands
     const prefix = "!";
 
@@ -34,33 +45,13 @@ client.on("message", async message => {
     const args = message.content.slice(prefix.length).trim().split(/ +/);
     const command = args.shift().toLowerCase();
 
-    //Command: Ping
-    //Date: 09/30/2020
-    //Desc: Test for connection and response.
-    if(command === 'ping'){
-        return message.channel.send("pong!")
+    if (!client.commands.has(command)) return;
+    try {
+        client.commands.get(command).execute(message, args);
     }
-
-    //Command: Args
-    //Date: 09/30/2020
-    //Desc: Bread and butter for handling user arguements. 
-    if(command === 'args'){
-        if(!args.length){
-            return message.channel.send(`${message.author} I need some arguments first. Use: !args <arguments>`);
-        }
-        else if(args[0] === 'azul'){
-            return message.channel.send(':<3:'); 
-        }
-        message.channel.send(`Command name: ${command}\nArguments: ${args}`)
-    }
-    //Command: Encour
-    //Date: 09/30/2020
-    //Desc: Handles tagging users. 
-    else if(command === 'encour')
-    {
-        const taggedUser = message.mentions.users.first();
-        message.channel.send(`${taggedUser.username} got encouraged!`);
-        return;
+    catch(error){
+        console.error(error);
+        message.reply('Command error');
     }
 
     console.log(`${message.author.username} said: ${message.content}`);
