@@ -83,7 +83,6 @@ client.on("message", async message => {
     {
         message.channel.send(`Username: ${message.author.username}`);
     }
-
     console.log(`${message.author.username} said: ${message.content}`);
 });
 
