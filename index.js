@@ -63,6 +63,27 @@ client.on("message", async message => {
         return;
     }
 
+    else if(command === 'how')
+    {
+        const taggedUser = message.mentions.users.first();
+        message.channel.send(`${taggedUser.username} I hope you're doing okay.`);
+        return;
+    }
+
+    else if(command === 'name')
+    {
+        return message.channel.send(message.guild.name);
+
+    }
+    else if(command === 'online')
+    {
+        return message.channel.send(`Total Members: ${message.guild.memberCount}`);
+    }
+    else if(command === 'me')
+    {
+        message.channel.send(`Username: ${message.author.username}`);
+    }
+
     console.log(`${message.author.username} said: ${message.content}`);
 });
 
