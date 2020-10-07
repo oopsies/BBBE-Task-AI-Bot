@@ -8,7 +8,7 @@ module.exports = {
         else if(args[0] === 'azul'){
             return message.channel.send(':<3:'); 
         }
-        message.channel.send(`Command name: ${command}\nArguments: ${args}`)
+        message.channel.send(`Command name: ${args}\nArguments: ${args}`);
     }
 
 };

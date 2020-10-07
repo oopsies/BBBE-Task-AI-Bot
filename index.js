@@ -53,7 +53,6 @@ client.on("message", async message => {
         console.error(error);
         message.reply('Command error');
     }
-
     console.log(`${message.author.username} said: ${message.content}`);
 });
 
