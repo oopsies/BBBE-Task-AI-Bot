@@ -1,4 +1,5 @@
 const fs = require('fs');
+const helper = require ('../helper.js');
 
 module.exports = {
     name: 'register',
@@ -38,7 +39,8 @@ module.exports = {
                     if (err) throw err;
                 })
             })
-            
+            //console.log(helper.getUserToken(message.author));
+
             return message.channel.send(`Token recieved ${message.author}!`); 
         }
     }
