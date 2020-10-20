@@ -9,9 +9,6 @@ const Discord = require('discord.js');
 client.commands = new Discord.Collection();
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'))
 
-const command = require('./command');
-
-
 //Path for token.
 config({
     path: __dirname + "/.env"
@@ -20,15 +17,6 @@ config({
 //Turn the bot on and set presence. 
 client.on("ready", () => {
     console.log("BBBE Bot is online!");
-
-    //Embedding
-    command(client, 'embed', (message) => {
-        const embed = new Discord.MessageEmbed()
-        .setTitle('Example text embed')
-
-        message.channel.send(embed)
-    })
-
 
     client.user.setPresence({
         status: "online",
