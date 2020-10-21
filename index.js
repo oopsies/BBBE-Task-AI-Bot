@@ -9,6 +9,7 @@ const Discord = require('discord.js');
 client.commands = new Discord.Collection();
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'))
 
+
 //Path for token.
 config({
     path: __dirname + "/.env"
