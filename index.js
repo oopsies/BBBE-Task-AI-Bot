@@ -27,11 +27,6 @@ client.on("ready", () => {
     })
 });
 
-for (const file of commandFiles){
-    const command = require(`./commands/${file}`);
-    client.commands.set(command.name, command);
-}
-
 //Handles messages
 client.on("message", async message => {
 
