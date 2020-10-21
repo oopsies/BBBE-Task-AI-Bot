@@ -3,6 +3,10 @@ const https = require('https');
 const helper = require('../helper.js');
 const fs = require('fs');
 
+var prefix = "https://canvas.instructure.com"
+var access_token = "";
+var m
+
 module.exports = {
     name: 'getassignments',
     description: 'Displays the user\'s future assignments.',
@@ -13,22 +17,18 @@ module.exports = {
         else {
 
             //intro message
-            message.channel.send(`Getting future assignments for your classes. This may take a few moments\n`);
+            message.channel.send(`Getting future assignments for your classes. This may take a few moments...a\n`);
 
             //access token
-            var access_token = '&access_token=' + helper.getUserToken(message.author);
+            access_token = '&access_token=' + helper.getUserToken(message.author);
 
             //set strings
-            var prefix = "https://canvas.instructure.com"
-            
             var main_call = '/api/v1/users/self/enrollments?'
 
             var url = prefix + main_call + access_token;
 
-            var result;
-
-            helper.httpsGetJSON(url).then(response => {
-                result = response;
+            function getAssignments(d) {
+                var result = d;
                 courses = [];
                 for (var i = 0; i < result.length; i++){
                     var str = result[i].html_url
@@ -37,35 +37,35 @@ module.exports = {
                     //console.log(cID);
                     courses.push(cID);
                 }
-                //console.log("Got course numbers");
-                
-                
+            
                 for (var i = 0; i < courses.length; i++){
-                    url = prefix + "/api/v1/courses/" + courses[i] + "/assignments?per_page=50" + access_token;
-                    
-                    helper.httpsGetJSON(url).then(response => {
-                        var m = "";
-                        result = response;
-                        for (var j = 0; j < result.length; j++){
-                            var dueTime = result[j].due_at;
-                            if (dueTime != null && dateInFuture(dueTime)){
-                                //console.log(result[j].name + " is due on " + parseDate(dueTime));
-                                m += result[j].name + " is due on " + parseDate(dueTime) + "\n";
-                                //console.log(m);
-                            }
-                        }
-                        message.channel.send(m);
-                    });
+                    url2 = prefix + "/api/v1/courses/" + courses[i] + "/assignments?per_page=50" + access_token;
+                    helper.httpsGetJSON(url2, printAssignments);
                 }
-                //console.log(result);
-                
+            
+            }
+            
+            function printAssignments(d) {
+                var m = "";
+                result = d;
+                for (var j = 0; j < result.length; j++){
+                    var dueTime = result[j].due_at;
+                    if (dueTime != null && dateInFuture(dueTime)){
+                        console.log(result[j].name + " is due on " + parseDate(dueTime));
+                        m += result[j].name + " is due on " + parseDate(dueTime) + "\n";
+                        //console.log(m);
+                    }
+                }
+                if (m != "") { message.channel.send(m); } 
+            }
 
-                
-            });
+            helper.httpsGetJSON(url, getAssignments);
 
         }
     }
 };
+
+
 
 ///Returns a readable string based on a date.
 //example date format: 2020-11-03T05:59:59Z

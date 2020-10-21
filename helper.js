@@ -24,13 +24,12 @@ function userRegistered(id){
 /**
  * Gets the HTTPS Response from the page, and returns the parsed JSON.
  * @param {string} url 
+ * @param {function} callback
  */
-function httpsGetJSON (url){
-    return new Promise((resolve, reject) => {
-    var result;
+function httpsGetJSON (url, callback){
     https.get(url, "JSON", function (response) {
-        var data;
 
+        var data;
         response.on('data', function (chunk) {
             if (!data) {
                 data = chunk;
@@ -40,15 +39,13 @@ function httpsGetJSON (url){
             }
         });
         response.on("end", function () {
-            result = JSON.parse(data);
-            resolve(result);
+            data = JSON.parse(data);
+            callback(data);
         });
 
     }).on('error', (e) => {
         console.error(e);
-    });
-
-    });
+        });
 }
 
 module.exports = { getUserToken, userRegistered, httpsGetJSON };
