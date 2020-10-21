@@ -13,5 +13,4 @@ var result;
 helper.httpsGetJSON(url).then(response => {
     result = response;
     console.log(result);
-
 })
