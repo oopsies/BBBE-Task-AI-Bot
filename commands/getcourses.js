@@ -37,8 +37,8 @@ module.exports = {
                         if (dat[i].name != undefined) {
                             console.log(dat[i].name);
                             message.channel.send(dat[i].name + "\n");
-                      }
-                  }
+                        }
+                    }
                 });
               
               }).on('error', (e) => {
