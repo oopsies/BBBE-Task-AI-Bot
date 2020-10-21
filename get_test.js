@@ -1,26 +1,17 @@
 //A simple GET request to the Canvas API, not to be used for anything real
 const https = require('https');
+const helper = require ('./helper.js');
 
 var prefix = "https://canvas.instructure.com"
-var access_token = "&access_token=9082~9ojp64MaovXtBToA5OqfSTBIZqGk8luPJ52ChLobxglbrLYZpHM82yoDnpPc4qtX"
+//var access_token = 
+var main_call = '/api/v1/users/self/enrollments?'
 
+var url = prefix + main_call + access_token;
 
-https.get(prefix + '/api/v1/courses?per_page=100' + access_token, (res) => {
-  //console.log('statusCode:', res.statusCode);
-  //console.log('headers:', res.headers);
-  
+var result;
 
-  res.on('data', (d) => {
-    //process.stdout.write(d);
-    var dat = JSON.parse(d);
-    //console.log(dat);
-    for (var i = 0; i < dat.length; i++){
-        if (dat[i].name != undefined) {
-            console.log(dat[i].name);
-        }
-    }
-  });
+helper.httpsGetJSON(url).then(response => {
+    result = response;
+    console.log(result);
 
-}).on('error', (e) => {
-  console.error(e);
-});
+})
