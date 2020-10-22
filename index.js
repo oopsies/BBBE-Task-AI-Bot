@@ -32,6 +32,7 @@ for (const file of commandFiles){
     client.commands.set(command.name, command);
 }
 
+
 //Handles messages
 client.on("message", async message => {
 
@@ -48,6 +49,7 @@ client.on("message", async message => {
     if (!client.commands.has(command)) return;
     try {
         client.commands.get(command).execute(message, args);
+        console.log(`${command}\t${message}\t${args}`)
     }
     catch(error){
         console.error(error);
