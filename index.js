@@ -33,6 +33,7 @@ for (const file of commandFiles){
     client.commands.set(command.name, command);
 }
 
+
 //Handles messages
 client.on("message", async message => {
 

@@ -1,4 +1,2 @@
-get_test.js
 *.env
-.env
-index.js
+tokens.json
