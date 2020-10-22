@@ -1,35 +1,71 @@
-//A simple GET request to the Canvas API, not to be used for anything real
+///TODO: Resolve warnings LOL (there's a lot of them)
 const https = require('https');
+const helper = require('../helper.js');
+const fs = require('fs');
 
 var prefix = "https://canvas.instructure.com"
-var access_token = 
+var access_token = "";
+var m
 
-https.get(prefix + '/api/v1/courses/90820000000033995/assignments?per_page=100' + access_token, "JSON", function(response){
-   var data;
+module.exports = {
+    name: 'getassignments',
+    description: 'Displays the user\'s future assignments.',
+    execute(message, args){
+        if(!helper.userRegistered(message.author)){
+            return message.channel.send(`${message.author} Please use !register first to link your Canvas account.`);
+        }
+        else {
 
-  response.on('data', function(chunk) {
-    if (!data){
-        data = chunk;
-    }
-    else{
-        data += chunk;
-    }
-  });
-  response.on("end", function() {
-    const result = JSON.parse(data);
-    for (var i = 0; i < result.length; i++){
-        var dueTime = result[i].due_at;
-        if (dueTime != null && dateInFuture(dueTime)){
-            console.log(result[i].name + " is due at " + parseDate(dueTime));
+            //intro message
+            message.channel.send(`Getting future assignments for your classes. This may take a few moments...a\n`);
+
+            //access token
+            access_token = '&access_token=' + helper.getUserToken(message.author);
+
+            //set strings
+            var main_call = '/api/v1/users/self/enrollments?'
+
+            var url = prefix + main_call + access_token;
+
+            function getAssignments(d) {
+                var result = d;
+                courses = [];
+                for (var i = 0; i < result.length; i++){
+                    var str = result[i].html_url
+                    var cID = str.substring(str.lastIndexOf("courses/") + 1, str.lastIndexOf("/users"));
+                    cID = cID.substring(7);
+                    //console.log(cID);
+                    courses.push(cID);
+                }
+            
+                for (var i = 0; i < courses.length; i++){
+                    url2 = prefix + "/api/v1/courses/" + courses[i] + "/assignments?per_page=50" + access_token;
+                    helper.httpsGetJSON(url2, printAssignments);
+                }
+            
+            }
+            
+            function printAssignments(d) {
+                var m = "";
+                result = d;
+                for (var j = 0; j < result.length; j++){
+                    var dueTime = result[j].due_at;
+                    if (dueTime != null && dateInFuture(dueTime)){
+                        console.log(result[j].name + " is due on " + parseDate(dueTime));
+                        m += result[j].name + " is due on " + parseDate(dueTime) + "\n";
+                        //console.log(m);
+                    }
+                }
+                if (m != "") { message.channel.send(m); } 
+            }
+
+            helper.httpsGetJSON(url, getAssignments);
+
         }
     }
+};
 
-      //console.log(result);
-  })
 
-}).on('error', (e) => {
-  console.error(e);
-});
 
 ///Returns a readable string based on a date.
 //example date format: 2020-11-03T05:59:59Z
@@ -69,9 +105,10 @@ function dateInFuture (date) {
     var minute = time.substring(3, 5);
     var second = time.substring(6);
 
-    //create date and subtract for correct time zone
+    //create date 
     var inputDate = new Date(year, month, day, hour, minute, second);
 
+    //compare date
     if (inputDate > now)
         return true;
     return false;
