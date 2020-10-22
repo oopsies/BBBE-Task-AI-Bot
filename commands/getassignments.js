@@ -2,10 +2,12 @@
 const https = require('https');
 const helper = require('../helper.js');
 const fs = require('fs');
+const { DiscordAPIError } = require('discord.js');
+const Discord = require('discord.js');
 
 var prefix = "https://canvas.instructure.com"
 var access_token = "";
-var m
+//var m
 
 module.exports = {
     name: 'getassignments',
@@ -48,15 +50,31 @@ module.exports = {
             function printAssignments(d) {
                 var m = "";
                 result = d;
+
+                //build embed here
+                const embed = new Discord.MessageEmbed()
+                    .setColor('#059033')
+                    .setTitle('Future Assignments')
+                   // .setURL() ~ Insert Canvas Dashboard Page Here?
+                    .setThumbnail('https://upload.wikimedia.org/wikipedia/en/thumb/a/a2/North_Texas_Mean_Green_logo.svg/1200px-North_Texas_Mean_Green_logo.svg.png');
+                
+
+
+                var countAssignments = 1;
                 for (var j = 0; j < result.length; j++){
                     var dueTime = result[j].due_at;
                     if (dueTime != null && dateInFuture(dueTime)){
                         console.log(result[j].name + " is due on " + parseDate(dueTime));
                         m += result[j].name + " is due on " + parseDate(dueTime) + "\n";
                         //console.log(m);
+
+                        //creating fields
+                        embed.addField(`Assignment ${countAssignments}`, result[j].name + " is due on " + parseDate(dueTime), false);
+                        countAssignments++;
+
                     }
                 }
-                if (m != "") { message.channel.send(m); } 
+                if (m != "") {message.channel.send(embed);} 
             }
 
             helper.httpsGetJSON(url, getAssignments);
