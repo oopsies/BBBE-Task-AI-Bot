@@ -1,6 +1,8 @@
 const fs = require('fs');
 const helper = require ('../helper.js');
 const https = require('https');
+const { DiscordAPIError } = require('discord.js');
+const Discord = require('discord.js');
 
 module.exports = {
     name: 'getcourses',
@@ -12,7 +14,7 @@ module.exports = {
         else {
             
             //intro message
-            message.channel.send(`Here's a list of your available courses:\n`);
+            //message.channel.send(`Here's a list of your available courses:\n`);
 
             //get user token
             var access_token = '&access_token=' + helper.getUserToken(message.author);
@@ -28,17 +30,28 @@ module.exports = {
               
                 //get data
                 res.on('data', (d) => {
-                
+                    
                     //parse JSON data
                     var dat = JSON.parse(d);
                     //console.log(dat);
                     //print name of courses if they are defined
+                    const embed = new Discord.MessageEmbed()
+                    .setColor('#059033')
+                    .setTitle('Future Assignments')
+                   // .setURL() ~ Insert Canvas Dashboard Page Here?
+                    .setThumbnail('https://upload.wikimedia.org/wikipedia/en/thumb/a/a2/North_Texas_Mean_Green_logo.svg/1200px-North_Texas_Mean_Green_logo.svg.png');
+                    
+                    
+                    var countCourses = 1
                     for (var i = 0; i < dat.length; i++){
                         if (dat[i].name != undefined) {
                             console.log(dat[i].name);
-                            message.channel.send(dat[i].name + "\n");
+                            //message.channel.send(dat[i].name + "\n");
+                            embed.addField(`Course ${countCourses}`, dat[i].name, false);
+                            countCourses++; 
                         }
                     }
+                    message.channel.send(embed);
                 });
               
               }).on('error', (e) => {

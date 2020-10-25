@@ -15,7 +15,7 @@ module.exports = {
         else {
 
             //intro message
-            message.channel.send(`Getting grades for your classes. This may take a few moments...a\n`);
+            message.channel.send(`Getting grades for your classes. This may take a few moments...\n`);
 
             //access token
             access_token = '&access_token=' + helper.getUserToken(message.author);
@@ -31,14 +31,16 @@ module.exports = {
             function getGrades(d) {
                 var result = d;
                 var courses = [];
+                //console.log(result);
                 
                 for (var i = 0; i < result.length; i++){
-                    var str = result[i].grades.html_url
+                    var str = result[i].grades.html_url;
                     var cID = str.substring(str.lastIndexOf("courses/") + 1, str.lastIndexOf("/grades"));
                     cID = cID.substring(7);
                     //console.log(cID);
                     
-                    var grade = result[i].grades.current_grade
+                    var grade = result[i].grades.current_score;
+                    console.log(grade);
                     if (grade !== undefined) {
                         //console.log(grade);
                         courses.push(cID);
@@ -47,7 +49,6 @@ module.exports = {
                 }
             
                 for (var i = 0; i < courses.length; i++){
-                    iter = i;
                     url = prefix + "/api/v1/courses/" + courses[i] + "?" + access_token;
                     helper.httpsGetJSON(url, printGrades);
                 }
@@ -61,8 +62,10 @@ module.exports = {
                 }
                 else {
                     //console.log("Grade for " + d.name + ": " + grades[iter]);
+                    console.log(iter);
                     message.channel.send("Grade for " + d.name + ": " + grades[iter]);
                 }
+                iter += 1;
             }
 
             helper.httpsGetJSON(url, getGrades);
