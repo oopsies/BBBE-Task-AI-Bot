@@ -17,8 +17,9 @@ module.exports = {
         }
         else if(args.length>=2)
         {
-            args.forEach(myFunction)
-            function myFunction(item){
+            arr = []
+            arr.forEach(myfunction2)
+            function myfunction2(item){
                 message.channel.send(`${item}`)
             }
             message.channel.send("Timer:"+ms(ms(Timer),{long:true}))
@@ -26,11 +27,5 @@ module.exports = {
                 message.channel.send(message.author.toString()+` It has been:${ms(ms(Timer),{long:true})}`)
             },ms(Timer))
         }
-        // if(!args[0]){
-        //     return message.channel.send("Usage: !timer + duration + s|m|h")
-        // }
-
-        // if(args[0] <= 0){
-        //     return message.channel.send("Usage: !timer + duration + s|m|h")
     }
 };
