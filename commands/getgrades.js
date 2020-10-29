@@ -34,7 +34,7 @@ module.exports = {
                 //console.log(result);
                 
                 for (var i = 0; i < result.length; i++){
-                    var str = result[i].grades.html_url
+                    var str = result[i].grades.html_url;
                     var cID = str.substring(str.lastIndexOf("courses/") + 1, str.lastIndexOf("/grades"));
                     cID = cID.substring(7);
                     //console.log(cID);
