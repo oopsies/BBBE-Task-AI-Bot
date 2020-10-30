@@ -51,11 +51,10 @@ module.exports = {
                 var m = "";
                 result = d;
 
-                //build embed here
+                //building embed here
                 const embed = new Discord.MessageEmbed()
                     .setColor('#059033')
                     .setTitle('Future Assignments')
-                   // .setURL() ~ Insert Canvas Dashboard Page Here?
                     .setThumbnail('https://upload.wikimedia.org/wikipedia/en/thumb/a/a2/North_Texas_Mean_Green_logo.svg/1200px-North_Texas_Mean_Green_logo.svg.png');
                 
 

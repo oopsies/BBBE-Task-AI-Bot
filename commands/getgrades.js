@@ -1,6 +1,9 @@
 const https = require('https');
 const helper = require('../helper.js');
 const fs = require('fs');
+const { DiscordAPIError } = require('discord.js');
+const Discord = require('discord.js');
+
 
 var prefix = "https://canvas.instructure.com"
 var access_token = "";
