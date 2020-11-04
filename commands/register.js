@@ -6,7 +6,7 @@ module.exports = {
     description: 'Register a user\'s token with their Discord ID.',
     execute(message, args){
         if(!args.length){
-            return message.channel.send(`${message.author} Usage: !register <Canvas Access Token>
+            return message.author.send(`${message.author} Usage: !register <Canvas Access Token>
             \nHow to get your access token:
             \n1. Log in to canvas on your web browser.
             \n2. On the left hand side, click account > settings.
@@ -31,6 +31,8 @@ module.exports = {
                 if (err) throw err;
             
                 var objs = JSON.parse(data);
+
+                
                 objs[message.author] = args[0];
             
                 //console.log(objs);
