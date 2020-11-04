@@ -1,5 +1,6 @@
 //helper functions
 const fs = require('fs');
+const https = require('https');
 
 /**Returns Canvas access token based on Discord ID: goes through JSON file containing pairs
 *@param {string} id - User's Discord ID
@@ -20,5 +21,93 @@ function userRegistered(id){
         return false;
     return true;
 }
+/**
+ * Gets the HTTPS Response from the page, and returns the parsed JSON.
+ * Uses callbacks. Try to use the one with promises
+ * @param {string} url 
+ * @param {function} callback
+ */
+function httpsGetJSON (url, callback){
+    https.get(url, "JSON", function (response) {
 
-module.exports = { getUserToken, userRegistered };
+        var data;
+        response.on('data', function (chunk) {
+            if (!data) {
+                data = chunk;
+            }
+            else {
+                data += chunk;
+            }
+        });
+        response.on("end", function () {
+            data = JSON.parse(data);
+            callback(data);
+        });
+
+    }).on('error', (e) => {
+        console.error(e);
+        });
+}
+
+/**
+ * Gets the HTTPS Response from the page, and returns a promise of the parsed JSON.
+ * Uses promises instead of callbacks
+ * @param {string} url 
+ */
+function httpsGetJSON2(url){
+    let dataPromise = new Promise((resolve, reject) => {
+        https.get(url, "JSON", function (response) {
+            var data;
+            response.on('data', function (chunk) {
+                if (!data) {
+                    data = chunk;
+                }
+                else {
+                    data += chunk;
+                }
+            });
+            response.on("end", function () {
+                data = JSON.parse(data);
+                resolve(data); //sucess, return the data
+            });
+
+        }).on('error', (e) => {
+            console.error(e);
+            reject(e); //error, reject
+            });
+    });
+    //return the promise of the data
+    return dataPromise;
+}
+/**
+ * Store
+ * @param {string} filename - where to store the courses
+ * @param {string} id - the user's Discord ID
+ * @param {JSON} courses - a JSON object of the user's courseID's and courseNames
+ */
+function storeUserCourses(id, courses){
+    //create file if it does not exist
+    if(!fs.existsSync('userCourses.json'))  {
+        fs.writeFileSync('userCourses.json', "{}", (err) => {
+            if (err) console.log("err");
+            console.log('User courses file successfully created')
+        })
+    }
+
+    //1. Read JSON file into JS object
+    //2. Append the courses into the object
+    //3. Write back to JSON file
+    fs.readFile('userCourses.json', 'utf-8', function(err, data) {
+        if (err) throw err;
+    
+        let objs = JSON.parse(data);
+        objs[id] = courses;
+    
+        fs.writeFile('userCourses.json', JSON.stringify(objs), 'utf-8', function(err) {
+            if (err) throw err;
+        })
+    })
+
+}
+
+module.exports = { getUserToken, userRegistered, httpsGetJSON, httpsGetJSON2, storeUserCourses };
