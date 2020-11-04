@@ -6,59 +6,34 @@ const Discord = require('discord.js');
 
 module.exports = {
     name: 'getcourses',
-    description: 'Displays the user who called the command in the server.',
+    description: 'Displays the user\'s courses.',
     execute(message, args){
         if(!helper.userRegistered(message.author)){
             return message.channel.send(`${message.author} Please use !register first to link your Canvas account.`);
         }
         else {
-            
-            //intro message
-            //message.channel.send(`Here's a list of your available courses:\n`);
 
-            //get user token
-            var access_token = '&access_token=' + helper.getUserToken(message.author);
-
-            //set strings for HTTPS request
-            var prefix = "https://canvas.instructure.com";
-            var main_call = '/api/v1/courses?per_page=100';
-
-            //get request
-            https.get(prefix + main_call + access_token, (res) => {
-                //console.log('statusCode:', res.statusCode);
-                //console.log('headers:', res.headers);
-              
-                //get data
-                res.on('data', (d) => {
-                    
-                    //parse JSON data
-                    var dat = JSON.parse(d);
-                    //console.log(dat);
-                    //print name of courses if they are defined
-                    const embed = new Discord.MessageEmbed()
+            //set up embed
+            const embed = new Discord.MessageEmbed()
                     .setColor('#059033')
-                    .setTitle('Future Assignments')
+                    .setTitle('Your courses')
                    // .setURL() ~ Insert Canvas Dashboard Page Here?
-                    .setThumbnail('https://upload.wikimedia.org/wikipedia/en/thumb/a/a2/North_Texas_Mean_Green_logo.svg/1200px-North_Texas_Mean_Green_logo.svg.png');
-                    
-                    
-                    var countCourses = 1
-                    for (var i = 0; i < dat.length; i++){
-                        if (dat[i].name != undefined) {
-                            console.log(dat[i].name);
-                            //message.channel.send(dat[i].name + "\n");
-                            embed.addField(`Course ${countCourses}`, dat[i].name, false);
-                            countCourses++; 
-                        }
-                    }
-                    message.channel.send(embed);
-                });
-              
-              }).on('error', (e) => {
-                console.error(e);
-              });
+                    .setThumbnail('https://upload.wikimedia.org/wikipedia/en/thumb/a/a2/North_Texas_Mean_Green_logo.svg/1200px-North_Texas_Mean_Green_logo.svg.png')
+                    .setFooter("Wrong courses? Use !update to refresh your courses.", "https://e7.pngegg.com/pngimages/1017/780/png-clipart-exclamation-mark-exclamation-mark.png")
+                    .setTimestamp();
+            
+            let courses = helper.getUserCourses(message.author.id); //returns an object of courseIDs:CourseNames
+            let count = 0; //keep track of course no.
+            //console.log(courses);
+            for (key in courses){
+                count += 1;
+                //console.log(courses[key]);
+                embed.addField(`Course ${count}`, courses[key], false);
+            }
+            message.channel.send(embed);
 
             return;
+
         }
     }
 };
