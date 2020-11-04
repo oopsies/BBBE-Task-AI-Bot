@@ -43,7 +43,54 @@ module.exports = {
             })
             //console.log(helper.getUserToken(message.author));
 
-            return message.author.send(`Token recieved ${message.author}!`); 
+            message.channel.send(`Token recieved ${message.author}!`); 
+
+            //Get and store user's class ID's to make fetching them easier in the future
+
+            var prefix = "https://canvas.instructure.com"
+            var access_token = "&access_token=" + args[0];
+            var main_call = '/api/v1/users/self/enrollments?per_page=50'
+
+            let url = prefix + main_call + access_token;
+
+            helper.httpsGetJSON2(url).then((result) => {
+                let courses = [];
+            
+                //get all course ID's from the result
+                for (let i = 0; i < result.length; i++){
+                    var str = result[i].grades.html_url
+                    var cID = str.substring(str.lastIndexOf("courses/") + 1, str.lastIndexOf("/grades"));
+                    cID = cID.substring(7);
+                    //console.log(cID);
+                    courses.push(cID);
+                }
+            
+                courseDataPromises = []; //start an array of promises
+            
+                for (let i = 0; i < courses.length; i++){
+                    u = prefix + "/api/v1/courses/" + courses[i] + "?" + access_token;
+                    //add data promise to array
+                    courseDataPromises.push(helper.httpsGetJSON2(u));
+                }
+            
+                //go through all promises when done
+                Promise.all(courseDataPromises).then((results) => {
+            
+                    //create object
+                    let IDNamePairs = {};
+            
+                    for (let i = 0; i < results.length; i++){
+                        IDNamePairs[courses[i]] = results[i].name;
+                        //console.log(results[i].name);
+                    }
+            
+                    helper.storeUserCourses(message.author.id, IDNamePairs);
+                    //console.log(message.author.id);
+                    //console.log(IDNamePairs);
+                });
+            
+            }).catch((reject) => { console.log(reject) });
+
         }
     }
 
