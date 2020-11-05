@@ -1,4 +1,3 @@
-///TODO: Resolve warnings LOL (there's a lot of them)
 const https = require('https');
 const helper = require('../helper.js');
 const fs = require('fs');
@@ -16,12 +15,12 @@ module.exports = {
     description: 'Displays the user\'s future assignments.',
     execute(message, args){
         if(!helper.userRegistered(message.author)){
-            return message.channel.send(`${message.author} Please use !register first to link your Canvas account.`);
+            return message.channel.send(`${message.author} Please use !register in a private message first to link your Canvas account.`);
         }
         else {
 
             //intro message
-            message.channel.send(`Getting future assignments for your classes. This may take a few moments...a\n`);
+            message.channel.send(`Getting future assignments for your classes. This may take a few moments...\n`);
 
             //access token
             access_token = '&access_token=' + helper.getUserToken(message.author);

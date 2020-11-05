@@ -50,7 +50,7 @@ client.on("message", async message => {
     if (!client.commands.has(command)) return;
     try {
         client.commands.get(command).execute(message, args);
-        console.log(`${command}\t${message}\t${args}`)
+        //console.log(`${command}\t${message}\t${args}`)
     }
     catch(error){
         console.error(error);
