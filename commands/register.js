@@ -68,9 +68,9 @@ module.exports = {
                     var str = result[i].grades.html_url
                     var cID = str.substring(str.lastIndexOf("courses/") + 1, str.lastIndexOf("/grades"));
                     cID = cID.substring(7);
-                    //console.log(cID);
                     courses.push(cID);
                 }
+                //console.log(courses);
             
                 courseDataPromises = []; //start an array of promises
             

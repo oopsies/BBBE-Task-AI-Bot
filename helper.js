@@ -95,19 +95,35 @@ function storeUserCourses(id, courses){
         })
     }
 
+    //console.log(id);
+
+    const data = fs.readFileSync('userCourses.json');
+
+    let objs = JSON.parse(data);
+    //console.log(objs);
+
+    objs[id] = courses;
+    //console.log("in: ");
+    //console.log(objs);
+
+    fs.writeFileSync('userCourses.json', JSON.stringify(objs));
+
     //1. Read JSON file into JS object
     //2. Append the courses into the object
     //3. Write back to JSON file
-    fs.readFileSync('userCourses.json', 'utf-8', function(err, data) {
+    /*fs.readFileSync('userCourses.json', function(err, data) {
         if (err) throw err;
     
+        console.log("yo we good");
         let objs = JSON.parse(data);
         objs[id] = courses;
+        console.log("yo we good");
     
         fs.writeFileSync('userCourses.json', JSON.stringify(objs), 'utf-8', function(err) {
             if (err) throw err;
         })
-    })
+    });*/
+    //console.log("done")
 
 }
 
@@ -120,6 +136,8 @@ function getUserCourses(id){
     
     const data = fs.readFileSync('userCourses.json', 'utf8');
     const userData = JSON.parse(data)[id];
+    //console.log("out: ");
+    //console.log(userData);
     /*for (key in betterData){
         console.log(key + " == " + betterData[key]);
     }*/
