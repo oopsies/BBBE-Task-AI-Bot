@@ -31,12 +31,17 @@ module.exports = {
             var url = prefix + main_call + access_token;
             //Course Ids
             courses = [];
+
             //Course Names
             coursed = [];
             //Validation of appearance
             courseBool = [];
             //List of Assignments
             courseEmbeds = [];
+            counter = 0;
+            counter2 = 0;
+            id = 0;
+            id2 = 0;
             function getAssignments(d) {
                 result = d;
                 for (var i = 0; i < result.length; i++){
@@ -48,10 +53,15 @@ module.exports = {
                 }
                 //Api Calls
                 for (var i = 0; i < courses.length; i++){
+                    console.log(courses[i])
+                    console.log(i)
                     url2 = prefix + "/api/v1/courses/" + courses[i] + "/assignments?per_page=50" + access_token;
                     url3 = prefix + "/api/v1/courses/" + courses[i] + "?" +access_token
                     helper.httpsGetJSON(url3, getCourseName);
                     helper.httpsGetJSON(url2, printAssignments);
+                    if(i==courses.length-1){
+                        console.log("done")
+                    }
                 }
 
             }
@@ -60,7 +70,11 @@ module.exports = {
             function getCourseName(d){
                 var result = d;
                 var str = result.name;
-                coursed.push(result);
+                coursed.push(result.name);
+                console.log(result.name+"==="+result.id)
+                console.log(id)
+                console.log(counter)
+                counter++;
                 courseBool.push(0);
             }
 
@@ -82,49 +96,9 @@ module.exports = {
                 //Cycles through all assignments then all courses
                 for (var j = 0; j < result.length; j++){
                     var dueTime = result[j].due_at;
-                    for(var k = 0; k < coursed.length; k++ ){
                         //Checks if the assignment courseid is equal to the courseID for naming purposes
-                        if(parseInt(result[j].course_id)===parseInt(coursed[k].id)){
-                            if(courseBool[k]!=1){
-                                courseBool[k]=1;
-                                var embed2 = new Discord.MessageEmbed()
-                                    .setColor('#059033')
-                                    .setTitle(coursed[k].name)
-                               // .setURL() ~ Insert Canvas Dashboard Page Here?
-                                    .setThumbnail('https://upload.wikimedia.org/wikipedia/en/thumb/a/a2/North_Texas_Mean_Green_logo.svg/1200px-North_Texas_Mean_Green_logo.svg.png');
-                                    //.description(coursed[k].id)
-                                embed = embed2
-                                embed.description=coursed[k].id
-                            }
-                            else{
-                                for(x = 0; x < courseEmbeds.length; x++){
-                                    if(courseEmbeds[x].title==coursed[k].name){
-                                        embed = courseEmbeds[x];
-                                        break;
-                                    }
-                                }
-                            }
-                            break;
-                        }
-                    }
                     //Makes sure only futre assignments get printed
                     if (dueTime != null && dateInFuture(dueTime)){
-                        if(embed.description!=result[j].course_id){
-                            for(x=0; x < courseEmbeds.length; x++){
-                                if(courseEmbeds[x].description===result[j].course_id){
-                                    embed = courseEmbeds[x];
-                                    break;
-                                }
-                            }
-                        }
-                        else{
-                            console.log(embed.description+"==="+result[j].course_id)
-                            for(var p = 0; p < coursed.length; p++){
-                                if(embed.description===coursed[p].id){
-                                    console.log(coursed[p].name)
-                                }
-                            }
-                        }
                         //console.log(result[j].name + " is due on " + parseDate(dueTime)+ "\t");
                         m += result[j].name + " is due on " + parseDate(dueTime) + "\n";
                         //console.log(m);
@@ -137,27 +111,13 @@ module.exports = {
                     //courseEmbeds.push(embed)
                 }
                 if (m != "") {
-                    var checker = 0;
-                    for(var x = 0; x < courseEmbeds.length; x++){
-                        if(courseEmbeds[x].title===embed.title){
-                            embed.title = courseEmbeds[x].title
-                            courseEmbeds[x]=embed;
-                            console.log(embed)
-                            console.log("Found Again")
-                            console.log(embed.title)
-                            embed.title = courseEmbeds[x].title
+                            embed.title=coursed[counter2];
                             message.channel.send(embed);
-                            checker=1;
-                            break;
-                        }
-                    }
-                    if(checker==0){
-                        courseEmbeds.push(embed);
-                        message.channel.send(embed);
-                    }
-
-
+                           // console.log(embed.title+"\n"+counter2)
+                            //counter2++;
                 }
+                console.log(id2)
+                counter2++;
             }
 
             helper.httpsGetJSON(url, getAssignments);
