@@ -13,12 +13,12 @@ module.exports = {
     description: 'Displays the user\'s total grades.',
     execute(message, args){
         if(!helper.userRegistered(message.author)){
-            return message.channel.send(`${message.author} Please use !register first to link your Canvas account.`);
+            return message.channel.send(`${message.author} Please use !register in a private message first to link your Canvas account.`);
         }
         else {
 
             //intro message
-            message.channel.send(`Getting grades for your classes. This may take a few moments...\n`);
+            message.channel.send(`Getting grades for your classes...\n`);
 
             //access token
             access_token = '&access_token=' + helper.getUserToken(message.author);
@@ -26,53 +26,54 @@ module.exports = {
             //set strings
             var main_call = '/api/v1/users/self/enrollments?'
 
-            var grades = [];
-            var iter = 0;
-
             var url = prefix + main_call + access_token;
 
-            function getGrades(d) {
-                var result = d;
-                var courses = [];
-                //console.log(result);
-                
-                for (var i = 0; i < result.length; i++){
-                    var str = result[i].grades.html_url
-                    var cID = str.substring(str.lastIndexOf("courses/") + 1, str.lastIndexOf("/grades"));
-                    cID = cID.substring(7);
-                    //console.log(cID);
-                    
-                    var grade = result[i].grades.current_score;
-                    console.log(grade);
-                    if (grade !== undefined) {
-                        //console.log(grade);
-                        courses.push(cID);
-                        grades.push(grade);
+            var courseIDs = []; //ids of courses
+            var courseNames = []; //names of courses
+
+            //get course IDs and Names from cache
+            courses = helper.getUserCourses(message.author.id);
+            for (key in courses){
+                courseIDs.push(key);
+                courseNames.push(courses[key]);
+            }
+
+        
+            helper.httpsGetJSON2(url).then((result) => {
+                //console.log(result)
+
+                //set up embed
+                const embed = new Discord.MessageEmbed()
+                .setColor('#059033')
+                .setTitle('Your grades')
+                //.setURL() ~ Insert Canvas Dashboard Page Here?
+                .setThumbnail('https://upload.wikimedia.org/wikipedia/en/thumb/a/a2/North_Texas_Mean_Green_logo.svg/1200px-North_Texas_Mean_Green_logo.svg.png')
+                .setFooter("Wrong courses? Use !update to refresh your courses.", "https://e7.pngegg.com/pngimages/1017/780/png-clipart-exclamation-mark-exclamation-mark.png")
+                .setTimestamp();
+
+                for (let i = 0; i < courseIDs.length; i++){ //for each course, go through the enrollments and find the correct one
+                    for (let j = 0; j < result.length; j++){
+                        let cid = result[j].grades.html_url.substring(result[j].grades.html_url.lastIndexOf("courses/") + 1, result[j].grades.html_url.lastIndexOf("/grades")).substring(7); //god DANG this is ugly but i wanted to fit it on one line lol
+                        if (courseIDs[i] == cid){
+                            let grade = result[j].grades.current_score;
+
+                            if (grade == null || grade == undefined){
+                                embed.addField(`${courseNames[i]}`, "Your instructor has not put in a total grade for this course.", false);
+                                break;
+                            }
+                            else {
+                                embed.addField(`${courseNames[i]}`, `${grade}%`, false);
+                                break;
+                            }
+
+                        }
                     }
                 }
-            
-                for (var i = 0; i < courses.length; i++){
-                    url = prefix + "/api/v1/courses/" + courses[i] + "?" + access_token;
-                    helper.httpsGetJSON(url, printGrades);
-                }
-            
-            }
-            
-            function printGrades(d) {
-                if (grades[iter] == null) {
-                    //console.log("Your instructor has not put in a total grade for " + d.name + ".");
-                    message.channel.send("Your instructor has not put in a total grade for " + d.name + ".");
-                }
-                else {
-                    //console.log("Grade for " + d.name + ": " + grades[iter]);
-                    console.log(iter);
-                    message.channel.send("Grade for " + d.name + ": " + grades[iter]);
-                }
-                iter += 1;
-            }
 
-            helper.httpsGetJSON(url, getGrades);
+                return message.channel.send(embed);
 
+            });
+            return;
         }
     }
 };
