@@ -14,6 +14,14 @@ module.exports = {
         }
         else {
 
+              //get user token
+              var access_token = '&access_token=' + helper.getUserToken(message.author);
+              //set strings for HTTPS request
+              var prefix = "https://canvas.instructure.com";
+              var main_call = '/api/v1/courses?per_page=100';
+  
+
+
             //get request
             https.get(prefix + main_call + access_token, (res) => {
                 //console.log('statusCode:', res.statusCode);
