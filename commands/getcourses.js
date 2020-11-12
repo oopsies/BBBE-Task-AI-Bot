@@ -7,22 +7,12 @@ const Pagination = require('discord-paginationembed');
 
 module.exports = {
     name: 'getcourses',
-    description: 'Displays the user who called the command in the server.',
+    description: 'Displays the user\'s courses.',
     execute(message, args){
         if(!helper.userRegistered(message.author)){
             return message.channel.send(`${message.author} Please use !register first to link your Canvas account.`);
         }
         else {
-            
-            //intro message
-            //message.channel.send(`Here's a list of your available courses:\n`);
-
-            //get user token
-            var access_token = '&access_token=' + helper.getUserToken(message.author);
-
-            //set strings for HTTPS request
-            var prefix = "https://canvas.instructure.com";
-            var main_call = '/api/v1/courses?per_page=100';
 
             //get request
             https.get(prefix + main_call + access_token, (res) => {
@@ -84,6 +74,7 @@ module.exports = {
               });
 
             return;
+
         }
        
     }

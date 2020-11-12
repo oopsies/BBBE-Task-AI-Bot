@@ -80,7 +80,8 @@ function httpsGetJSON2(url){
     return dataPromise;
 }
 /**
- * Store
+ * Store the user's course ID's along with their name per user.
+ * This is done to reduce the total number of calls to the API.
  * @param {string} filename - where to store the courses
  * @param {string} id - the user's Discord ID
  * @param {JSON} courses - a JSON object of the user's courseID's and courseNames
@@ -94,20 +95,53 @@ function storeUserCourses(id, courses){
         })
     }
 
+    //console.log(id);
+
+    const data = fs.readFileSync('userCourses.json');
+
+    let objs = JSON.parse(data);
+    //console.log(objs);
+
+    objs[id] = courses;
+    //console.log("in: ");
+    //console.log(objs);
+
+    fs.writeFileSync('userCourses.json', JSON.stringify(objs));
+
     //1. Read JSON file into JS object
     //2. Append the courses into the object
     //3. Write back to JSON file
-    fs.readFile('userCourses.json', 'utf-8', function(err, data) {
+    /*fs.readFileSync('userCourses.json', function(err, data) {
         if (err) throw err;
     
+        console.log("yo we good");
         let objs = JSON.parse(data);
         objs[id] = courses;
+        console.log("yo we good");
     
-        fs.writeFile('userCourses.json', JSON.stringify(objs), 'utf-8', function(err) {
+        fs.writeFileSync('userCourses.json', JSON.stringify(objs), 'utf-8', function(err) {
             if (err) throw err;
         })
-    })
+    });*/
+    //console.log("done")
 
 }
 
-module.exports = { getUserToken, userRegistered, httpsGetJSON, httpsGetJSON2, storeUserCourses };
+/**
+ * Get the user's stored courses based on their id
+ * Returns an object containing a list of courseID's and names.
+ * @param {string} id s
+ */
+function getUserCourses(id){
+    
+    const data = fs.readFileSync('userCourses.json', 'utf8');
+    const userData = JSON.parse(data)[id];
+    //console.log("out: ");
+    //console.log(userData);
+    /*for (key in betterData){
+        console.log(key + " == " + betterData[key]);
+    }*/
+    return userData;
+}
+
+module.exports = { getUserToken, userRegistered, httpsGetJSON, httpsGetJSON2, storeUserCourses, getUserCourses };

@@ -12,14 +12,21 @@ module.exports = {
             \n2. On the left hand side, click account > settings.
             \n3. Scroll down and click on '+ New Access Token
             \n4. Click 'Generate Token' and copy the token given to you.`);
+            
         }
         else {
+
+            //if the user posts their key in a public channel, delete it and tell them to register privately
+            if (message.channel.type == "text") {
+                message.delete({timeout:1});
+                return message.channel.send(`${message.author}, please register your token with me through a private message. Do not release your Canvas token publicly.`);
+            }
             
             //create file if it does not exist
             if(!fs.existsSync('./tokens.json'))  {
-                fs.writeFile('./tokens.json', "{}", (err) => {
-                    if (err) console.log(err);
-                    console.log('Successfully created')
+                fs.writeFileSync('./tokens.json', "{}", (err) => {
+                    if (err) console.log("err");
+                    console.log('Tokens file successfully created')
                 })
             }
 
@@ -61,9 +68,9 @@ module.exports = {
                     var str = result[i].grades.html_url
                     var cID = str.substring(str.lastIndexOf("courses/") + 1, str.lastIndexOf("/grades"));
                     cID = cID.substring(7);
-                    //console.log(cID);
                     courses.push(cID);
                 }
+                //console.log(courses);
             
                 courseDataPromises = []; //start an array of promises
             
@@ -87,7 +94,7 @@ module.exports = {
                     helper.storeUserCourses(message.author.id, IDNamePairs);
                     //console.log(message.author.id);
                     //console.log(IDNamePairs);
-                });
+                }).catch(reject => {console.error(reject)});
             
             }).catch((reject) => { console.log(reject) });
 
