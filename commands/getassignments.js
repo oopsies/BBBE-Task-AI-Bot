@@ -5,6 +5,8 @@ const { DiscordAPIError } = require('discord.js');
 const Discord = require('discord.js');
 const { SSL_OP_SSLEAY_080_CLIENT_DH_BUG } = require('constants');
 const e = require('express');
+const Pagination = require('discord-paginationembed');
+
 
 var prefix = "https://canvas.instructure.com"
 var access_token = "";
@@ -42,11 +44,18 @@ module.exports = {
             function getAssignments(d) {
                 result = d;
                 for (var i = 0; i < result.length; i++){
+                    if(result[i].grades == undefined)
+                    {
+                        continue;
+                    }
+                    else
+                    {
                     var str = result[i].html_url
                     var cID = str.substring(str.lastIndexOf("courses/") + 1, str.lastIndexOf("/users"));
                     cID = cID.substring(7);
                     //console.log(cID);
                     courses.push(cID);
+                    }
                 }
                 //Api Calls
                 for (var i = 0; i < courses.length; i++){
@@ -66,6 +75,10 @@ module.exports = {
                 });
                 Promise.all(promises2).then((results)=>{
                     for(let i = 0; i < results.length; i++){
+
+                        //set up embed
+                        const embeds = [];
+
                         var embed = new Discord.MessageEmbed()
                         .setColor('#059033')
                         .setTitle(coursed[i].name)
@@ -81,13 +94,35 @@ module.exports = {
                                 //console.log(m);
         
                                 //creating fields
-                                embed.addField(`Assignment ${countAssignments}`, results[i][j].name + " is due on " + parseDate(dueTime), false);
+                                embeds.push(new Discord.MessageEmbed().addField(`Assignment ${countAssignments}`, results[i][j].name + " is due on " + parseDate(dueTime), false));
+                                //embed.addField(`Assignment ${countAssignments}`, results[i][j].name + " is due on " + parseDate(dueTime), false);
                                 countAssignments++;
         
                             }
                         }
-                        if (m != "") {message.channel.send(embed);}
-                    }                   
+                        if (m != "") {
+                            const myImage = message.author.displayAvatarURL();
+
+                            new Pagination.Embeds()
+                                .setArray(embeds)
+                                .setAuthorizedUsers([message.author.id])
+                                .setChannel(message.channel)
+                                .setPageIndicator(true)
+                                .setPage(1)
+                                // Methods below are for customising all embeds
+                                //.setImage(myImage)
+                                .setThumbnail('https://upload.wikimedia.org/wikipedia/en/thumb/a/a2/North_Texas_Mean_Green_logo.svg/1200px-North_Texas_Mean_Green_logo.svg.png')
+                                .setTitle("Your Assignments")
+                                .setDescription(`Here are the assignments for: ${message.author}`)
+                                //.setFooter("Wrong courses? Use !update to refresh your courses.", "https://e7.pngegg.com/pngimages/1017/780/png-clipart-exclamation-mark-exclamation-mark.png")
+                                .setTimestamp()
+                                .setColor('#059033')
+                                .build();    
+                        }
+                    }    
+                    
+                    
+                    
                 })
             }
 
