@@ -15,11 +15,14 @@ module.exports = {
 
         if(!args.length){
             const embed = new Discord.MessageEmbed()
-
-            .setColor('#059033')
-            .setTitle('HELP COMMAND')
-            .setThumbnail('https://upload.wikimedia.org/wikipedia/en/thumb/a/a2/North_Texas_Mean_Green_logo.svg/1200px-North_Texas_Mean_Green_logo.svg.png');
-            embed.addField('Here is a list of available commands: \n!getassignments \n!getcourses \n!getgrades \n!register \n!timer \nTo learn more about a specific command, try !help [command]');
+                .setColor('#059033')
+                .setTitle('Here is some help:')
+                .setDescription('If this is your first time using BBBE Bot please use !register to get started.')
+                .setThumbnail('https://upload.wikimedia.org/wikipedia/en/thumb/a/a2/North_Texas_Mean_Green_logo.svg/1200px-North_Texas_Mean_Green_logo.svg.png')
+                .addFields(
+                    {name: 'Here is a list of available commands:', value: '\n!register \n!getcourses \n!getgrades \n!getassignments \n!getassignmentgrades \n!timer \n', inline: false},
+                    {name: 'To learn more about a specific command:', value: "!help [command]", inline: false }
+                    );
             
             message.channel.send(embed);
         }

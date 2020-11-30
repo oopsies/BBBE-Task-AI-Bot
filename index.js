@@ -4,6 +4,7 @@ const { config } = require("dotenv");
 
 const client = new Client();
 
+
 const fs = require('fs');
 const Discord = require('discord.js');
 client.commands = new Discord.Collection();
@@ -19,13 +20,7 @@ config({
 client.on("ready", () => {
     console.log("BBBE Bot is online!");
 
-    client.user.setPresence({
-        status: "online",
-        game: {
-            name: "our awesome group!",
-            type: "WATCHING"
-        }
-    })
+    client.user.setActivity('Use !help');
 });
 
 for (const file of commandFiles){

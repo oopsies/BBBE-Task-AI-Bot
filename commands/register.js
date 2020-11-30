@@ -1,18 +1,25 @@
 const fs = require('fs');
 const helper = require ('../helper.js');
+const { DiscordAPIError } = require('discord.js');
+const Discord = require('discord.js');
+
 
 module.exports = {
     name: 'register',
     description: 'Register a user\'s token with their Discord ID.',
     execute(message, args){
         if(!args.length){
-            return message.author.send(`${message.author} Usage: !register <Canvas Access Token>
-            \nHow to get your access token:
-            \n1. Log in to canvas on your web browser.
-            \n2. On the left hand side, click account > settings.
-            \n3. Scroll down and click on '+ New Access Token
-            \n4. Click 'Generate Token' and copy the token given to you.`);
+            const embed = new Discord.MessageEmbed()
+                .setColor('#059033')
+                .setTitle('How to Get Started')
+                .setDescription('Usage: !register <Canvas Access Token>')
+                .setThumbnail('https://upload.wikimedia.org/wikipedia/en/thumb/a/a2/North_Texas_Mean_Green_logo.svg/1200px-North_Texas_Mean_Green_logo.svg.png')
+                .addFields(
+                    {name: 'How to get your access token:', value: '\n1. Log in to canvas on your web browser.\n2. On the left hand side, click account > settings.\n3. Scroll down and click on \'+ New Access Token\n4. Click \'Generate Token\' and copy the token given to you.` \n', inline: false},
+                    );
             
+            message.author.send(embed);
+
         }
         else {
 

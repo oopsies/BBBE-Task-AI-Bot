@@ -112,7 +112,7 @@ module.exports = {
                                 // Methods below are for customising all embeds
                                 //.setImage(myImage)
                                 .setThumbnail('https://upload.wikimedia.org/wikipedia/en/thumb/a/a2/North_Texas_Mean_Green_logo.svg/1200px-North_Texas_Mean_Green_logo.svg.png')
-                                .setTitle("Your Assignments")
+                                .setTitle(coursed[i].name)
                                 .setDescription(`Here are the assignments for: ${message.author}`)
                                 //.setFooter("Wrong courses? Use !update to refresh your courses.", "https://e7.pngegg.com/pngimages/1017/780/png-clipart-exclamation-mark-exclamation-mark.png")
                                 .setTimestamp()
@@ -120,8 +120,6 @@ module.exports = {
                                 .build();    
                         }
                     }    
-                    
-                    
                     
                 })
             }
