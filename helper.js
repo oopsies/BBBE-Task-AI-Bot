@@ -144,4 +144,96 @@ function getUserCourses(id){
     return userData;
 }
 
-module.exports = { getUserToken, userRegistered, httpsGetJSON, httpsGetJSON2, storeUserCourses, getUserCourses };
+///Returns a readable string based on a date.
+//example date format: 2020-11-03T05:59:59Z
+function parseDate (date){
+
+    //get parts of date and time
+    var year = date.substring(0, 4);
+    var month = date.substring(5, 7) - 1;
+    var day = date.substring(8, 10);
+
+    var time = date.substring(11, 19);
+    var hour = time.substring(0, 2);
+    var minute = time.substring(3, 5);
+    var second = time.substring(6);
+
+    //create date and subtract for correct time zone
+    var d = new Date(year, month, day, hour, minute, second);
+    d.setHours(d.getHours() - 6);
+
+    //console.log(d.toString());
+    //console.log(year + " " + month + " " + day + " " + hour + " " + minute + " " + second + "\n");
+
+    return d.toString();
+}
+
+///Returns true if the date input is in the future from now
+function dateInFuture (date) {
+    var now = new Date();
+
+    //get parts of date and time
+    var year = date.substring(0, 4);
+    var month = date.substring(5, 7) - 1;
+    var day = date.substring(8, 10);
+
+    var time = date.substring(11, 19);
+    var hour = time.substring(0, 2);
+    var minute = time.substring(3, 5);
+    var second = time.substring(6);
+
+    //create date
+    var inputDate = new Date(year, month, day, hour, minute, second);
+
+    //compare date
+    if (inputDate > now)
+        return true;
+    return false;
+}
+
+/**
+ * Returns true if {dueDate} is {days} {hours} and {minutes} away from today's date.
+ * @param {*} dueDate - date the assignment is due
+ * @param {int} days - is todays days this many days away from the due date?
+ * @param {int} hours - hours?
+ * @param {int} minutes - minutes?
+ * @param {int} interval - how many minutes between each check
+ */
+function isDue(dueDate, days, hours, minutes, interval){
+
+    var now = new Date();
+
+    var year = dueDate.substring(0, 4);
+    var month = dueDate.substring(5, 7) - 1;
+    var day = dueDate.substring(8, 10);
+
+    var time = dueDate.substring(11, 19);
+    var hour = time.substring(0, 2);
+    var minute = time.substring(3, 5);
+    var second = time.substring(6);
+    
+    var future = new Date(year, month, day, hour, minute, second);
+
+    const diffTime = Math.abs(future - now);
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)); 
+    const diffHours = Math.floor(diffTime / (1000 * 60 * 60)) - (24 * diffDays); 
+    const diffMins = Math.floor(diffTime / (1000 * 60)) - (60 * diffHours); 
+    /*console.log(diffTime + " milliseconds");
+    console.log(diffDays + " days");
+    console.log(diffHours + " hours");
+    console.log(diffMins + " mins");*/
+
+    /*console.log(diff.getDate());
+    console.log(diff.getHours());
+    console.log(diff.getMinutes());
+    console.log(diff.toString())*/
+
+    if (diffDays == days && diffHours== hours && diffMins >= minutes && diffMins <= minutes + interval)
+        return true;
+    return false;
+    
+
+
+}
+
+module.exports = { getUserToken, userRegistered, httpsGetJSON, httpsGetJSON2, storeUserCourses, getUserCourses, parseDate, dateInFuture, isDue };

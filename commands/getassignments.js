@@ -5,6 +5,8 @@ const { DiscordAPIError } = require('discord.js');
 const Discord = require('discord.js');
 const { SSL_OP_SSLEAY_080_CLIENT_DH_BUG } = require('constants');
 const e = require('express');
+const Pagination = require('discord-paginationembed');
+
 
 var prefix = "https://canvas.instructure.com"
 var access_token = "";
@@ -31,93 +33,97 @@ module.exports = {
             var url = prefix + main_call + access_token;
             //Course Ids
             courses = [];
-
+            var promises = [];
+            var promises2 = [];
             //Course Names
             coursed = [];
             //Validation of appearance
             courseBool = [];
             //List of Assignments
             courseEmbeds = [];
-            counter = 0;
-            counter2 = 0;
-            id = 0;
-            id2 = 0;
             function getAssignments(d) {
                 result = d;
                 for (var i = 0; i < result.length; i++){
+                    if(result[i].grades == undefined)
+                    {
+                        continue;
+                    }
+                    else
+                    {
                     var str = result[i].html_url
                     var cID = str.substring(str.lastIndexOf("courses/") + 1, str.lastIndexOf("/users"));
                     cID = cID.substring(7);
                     //console.log(cID);
                     courses.push(cID);
+                    }
                 }
                 //Api Calls
                 for (var i = 0; i < courses.length; i++){
-                    console.log(courses[i])
-                    console.log(i)
-                    url2 = prefix + "/api/v1/courses/" + courses[i] + "/assignments?per_page=50" + access_token;
-                    url3 = prefix + "/api/v1/courses/" + courses[i] + "?" +access_token
-                    helper.httpsGetJSON(url3, getCourseName);
-                    helper.httpsGetJSON(url2, printAssignments);
-                    if(i==courses.length-1){
-                        console.log("done")
+                    // console.log(courses[i])
+                    // console.log(i)
+                    let url2 = prefix + "/api/v1/courses/" + courses[i] + "/assignments?per_page=50" + access_token;
+                    let url3 = prefix + "/api/v1/courses/" + courses[i] + "?" +access_token
+                    //helper.httpsGetJSON(url3, getCourseName);
+                    promises.push(helper.httpsGetJSON2(url3));
+                    promises2.push(helper.httpsGetJSON2(url2));
+                    //helper.httpsGetJSON(url2, printAssignments);
+                }
+                Promise.all(promises).then((results)=>{
+                    for(let i = 0; i < results.length; i++){
+                        coursed.push(results[i]);
                     }
-                }
+                });
+                Promise.all(promises2).then((results)=>{
+                    for(let i = 0; i < results.length; i++){
 
-            }
+                        //set up embed
+                        const embeds = [];
+                        let title = coursed[i].name;
+                        var embed = new Discord.MessageEmbed()
+                        .setColor('#059033')
+                        .setTitle(coursed[i].name)
+                        .setThumbnail('https://upload.wikimedia.org/wikipedia/en/thumb/a/a2/North_Texas_Mean_Green_logo.svg/1200px-North_Texas_Mean_Green_logo.svg.png');    
+                        var countAssignments = 1;
+                        m=""
+                        for(let j = 0; j < results[i].length; j++){
+                            var dueTime = results[i][j].due_at;
 
-            //Lists of courses
-            function getCourseName(d){
-                var result = d;
-                var str = result.name;
-                coursed.push(result.name);
-                console.log(result.name+"==="+result.id)
-                console.log(id)
-                console.log(counter)
-                counter++;
-                courseBool.push(0);
-            }
+                            if (dueTime != null && dateInFuture(dueTime)){
+                                //console.log(result[j].name + " is due on " + parseDate(dueTime)+ "\t");
+                                m += results[i][j].name + " is due on " + parseDate(dueTime) + "\n";
+                                //console.log(m);
+        
+                                //creating fields
+                                embeds.push(new Discord.MessageEmbed().addField(`Assignment ${countAssignments}`, results[i][j].name + " is due on " + parseDate(dueTime), false));
+                                //embed.addField(`Assignment ${countAssignments}`, results[i][j].name + " is due on " + parseDate(dueTime), false);
+                                countAssignments++;
+        
+                            }
+                        }
+                        if (m != "") {
+                            const myImage = message.author.displayAvatarURL();
 
-
-            //Prints an embeded list based on courses and assignments
-            function printAssignments(d) {
-                var m = "";
-                result = d;
-
-                //build embed here
-                var embed = new Discord.MessageEmbed()
-                    .setColor('#059033')
-                    .setTitle('Future Assignments')
-                    .setThumbnail('https://upload.wikimedia.org/wikipedia/en/thumb/a/a2/North_Texas_Mean_Green_logo.svg/1200px-North_Texas_Mean_Green_logo.svg.png');
-
-
-
-                var countAssignments = 1;
-                //Cycles through all assignments then all courses
-                for (var j = 0; j < result.length; j++){
-                    var dueTime = result[j].due_at;
-                        //Checks if the assignment courseid is equal to the courseID for naming purposes
-                    //Makes sure only futre assignments get printed
-                    if (dueTime != null && dateInFuture(dueTime)){
-                        //console.log(result[j].name + " is due on " + parseDate(dueTime)+ "\t");
-                        m += result[j].name + " is due on " + parseDate(dueTime) + "\n";
-                        //console.log(m);
-
-                        //creating fields
-                        embed.addField(`Assignment ${countAssignments}`, result[j].name + " is due on " + parseDate(dueTime), false);
-                        countAssignments++;
-
-                    }
-                    //courseEmbeds.push(embed)
-                }
-                if (m != "") {
-                            embed.title=coursed[counter2];
-                            message.channel.send(embed);
-                           // console.log(embed.title+"\n"+counter2)
-                            //counter2++;
-                }
-                console.log(id2)
-                counter2++;
+                            new Pagination.Embeds()
+                                .setArray(embeds)
+                                .setAuthorizedUsers([message.author.id])
+                                .setChannel(message.channel)
+                                .setPageIndicator(true)
+                                .setPage(1)
+                                // Methods below are for customising all embeds
+                                //.setImage(myImage)
+                                .setThumbnail('https://upload.wikimedia.org/wikipedia/en/thumb/a/a2/North_Texas_Mean_Green_logo.svg/1200px-North_Texas_Mean_Green_logo.svg.png')
+                                .setTitle(title)
+                                .setDescription(`Here are the assignments for: ${message.author}`)
+                                //.setFooter("Wrong courses? Use !update to refresh your courses.", "https://e7.pngegg.com/pngimages/1017/780/png-clipart-exclamation-mark-exclamation-mark.png")
+                                .setTimestamp()
+                                .setColor('#059033')
+                                .build();    
+                        }
+                    }    
+                    
+                    
+                    
+                })
             }
 
             helper.httpsGetJSON(url, getAssignments);

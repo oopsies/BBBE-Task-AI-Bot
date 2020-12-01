@@ -65,10 +65,17 @@ module.exports = {
             
                 //get all course ID's from the result
                 for (let i = 0; i < result.length; i++){
+                    if(result[i].grades == undefined)
+                    {
+                        continue;
+                    }
+                    else
+                    {
                     var str = result[i].grades.html_url
                     var cID = str.substring(str.lastIndexOf("courses/") + 1, str.lastIndexOf("/grades"));
                     cID = cID.substring(7);
                     courses.push(cID);
+                    }
                 }
                 //console.log(courses);
             
