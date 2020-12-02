@@ -20,10 +20,11 @@ module.exports = {
         }
         var today = new Date();
         var day = today.getDay();
-        var daylist = ["Sunday","Monday","Tuesday","Wednesday ","Thursday","Friday","Saturday"];
+        var daylist = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
         console.log("Today is : " + daylist[day] + ".");
         message.channel.send("Today you have:\n");
         for(var i = 0; i < objs[message.author].length; i++){
+            console.log(objs[message.author][i].day)
             if(objs[message.author][i].day===daylist[day]){
                 message.channel.send(`${objs[message.author][i].name} at ${objs[message.author][i].hour}:${objs[message.author][i].minute}:${objs[message.author][i].second} ${objs[message.author][i].timeofday}\n`)
             }

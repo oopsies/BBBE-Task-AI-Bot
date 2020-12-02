@@ -132,7 +132,7 @@ function constantRe(){
             Promise.all(promises).then((results) => {
                 var today = new Date();
                 var day = today.getDay();
-                var daylist = ["Sunday","Monday","Tuesday","Wednesday ","Thursday","Friday","Saturday"];
+                var daylist = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
                 console.log("Today is : " + daylist[day] + ".");
                 var hour = today.getHours();
                 var minute = today.getMinutes();
@@ -207,7 +207,7 @@ function todayschedule(){
             }
             var today = new Date();
             var day = today.getDay();
-            var daylist = ["Sunday","Monday","Tuesday","Wednesday ","Thursday","Friday","Saturday"];
+            var daylist = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
             console.log("Today is : " + daylist[day] + ".");
             let promises = []
             promises.push(client.users.fetch(uid))
