@@ -4,12 +4,17 @@ const { config } = require("dotenv");
 
 const client = new Client();
 
+
 const fs = require('fs');
 const Discord = require('discord.js');
 const helper = require("./helper");
+const setConstantReminder = require("./commands/setConstantReminder");
+const constantRemind = require("./commands/constantRemind");
+const { SSL_OP_SSLEAY_080_CLIENT_DH_BUG } = require("constants");
 client.commands = new Discord.Collection();
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'))
 
+let boolean = 0;
 
 //Path for token.
 config({
@@ -27,8 +32,15 @@ client.on("ready", () => {
             type: "WATCHING"
         }
     })
+    todayschedule();
+    schedule();
+    console.log("Finished schedule");
+    constantRe();
+    schedule2();
+    console.log("Finished Schedule2");
     notifyAssignments();
     timetest();
+    console.log("Finished time test");
 });
 
 for (const file of commandFiles){
@@ -72,6 +84,150 @@ function timetest(){
     }, 15*1000*60); //every 15 mins
 }
 
+function schedule(){
+    setTimeout(function(){
+        todayschedule();
+        schedule();
+    },300*1000*60);
+}
+function schedule2(){
+    if(boolean==0){
+        setTimeout(function(){
+            constantRe();
+            boolean = 1;
+            schedule2();
+        },1000)
+    }
+    else{
+        setTimeout(function(){
+            boolean = 0;
+            schedule2();
+        },1000*60*30)
+    }
+}
+function constantRe(){
+    let users = []; //array of users to notify
+    if(fs.existsSync('usersToNotify.json'))  {
+        const data = JSON.parse(fs.readFileSync('usersToNotify.json'));
+        //get users to notify
+        for (key in data){
+            if (data[key] == "1") {
+               users.push(key);
+            }
+        }
+
+        for (let i = 0; i < users.length; i++){ //for every user
+            console.log(users[i]);
+            let uid = users[i].substring(2).slice(0, -1);
+            if(!fs.existsSync('./constantReminders.json')){
+                break;
+            }
+            const data = fs.readFileSync('./constantReminders.json');
+            let objs = JSON.parse(data);
+            if(objs[users[i]] == undefined){
+                continue;
+            }
+
+            let promises = []
+            promises.push(client.users.fetch(uid))
+            Promise.all(promises).then((results) => {
+                var today = new Date();
+                var day = today.getDay();
+                var daylist = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+                console.log("Today is : " + daylist[day] + ".");
+                var hour = today.getHours();
+                var minute = today.getMinutes();
+                var second = today.getSeconds();
+                var prepand = (hour >= 12)? "PM":"AM";
+                hour = (hour >= 12)? hour - 12: hour;
+                if (hour===0 && prepand==='PM') 
+                { 
+                if (minute===0 && second===0)
+                { 
+                hour=12;
+                } 
+                else
+                { 
+                hour=12;
+                prepand='PM';
+                } 
+                } 
+                if (hour===0 && prepand==='AM') 
+                { 
+                if (minute===0 && second===0)
+                { 
+                hour=12;
+                } 
+                else
+                { 
+                hour=12;
+                } 
+                } 
+              console.log("Current Time : "+hour + prepand + " : " + minute + " : " + second);
+                for(var j = 0; j < objs[users[i]].length; j++){
+                    if(objs[users[i]][j].day===daylist[day]){
+                        if(parseInt(objs[users[i]][j].hour)===hour){
+                            client.users.cache.get(uid).send(`Remember:\n${objs[users[i]][j].name} at ${objs[users[i]][j].hour}:${objs[users[i]][j].minute}:${objs[users[i]][j].second} ${objs[users[i]][j].timeofday}\n`)
+                            boolean = 1;
+                            if(parseInt(objs[users[i]][j].minute)===minute){
+                                if(objs[users[i]][j].timeofday===prepand){
+                                    client.users.cache.get(uid).send(`Remember:\n${objs[users[i]][j].name} at ${objs[users[i]][j].hour}:${objs[users[i]][j].minute}:${objs[users[i]][j].second} ${objs[users[i]][j].timeofday}\n`)
+                                }
+                            }
+                        }
+                    }
+                }
+            })    
+        }
+
+
+
+    }
+}
+function todayschedule(){
+    let users = []; //array of users to notify
+    if(fs.existsSync('usersToNotify.json'))  {
+        const data = JSON.parse(fs.readFileSync('usersToNotify.json'));
+        //get users to notify
+        for (key in data){
+            if (data[key] == "1") {
+               users.push(key);
+            }
+        }
+
+        for (let i = 0; i < users.length; i++){ //for every user
+            console.log(users[i]);
+            let uid = users[i].substring(2).slice(0, -1);
+            if(!fs.existsSync('./constantReminders.json')){
+                break;
+            }
+            const data = fs.readFileSync('./constantReminders.json');
+            let objs = JSON.parse(data);
+            if(objs[users[i]] == undefined){
+                continue;
+            }
+            var today = new Date();
+            var day = today.getDay();
+            var daylist = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+            console.log("Today is : " + daylist[day] + ".");
+            let promises = []
+            promises.push(client.users.fetch(uid))
+            Promise.all(promises).then((results) => {
+                console.log(results[0].id)
+                client.users.cache.get(results[0].id).send("Today you have:\n");
+                for(var j = 0; j < objs[users[i]].length; j++){
+                    if(objs[users[i]][j].day===daylist[day]){
+                        client.users.cache.get(results[0].id).send(`${objs[users[i]][j].name} at ${objs[users[i]][j].hour}:${objs[users[i]][j].minute}:${objs[users[i]][j].second} ${objs[users[i]][j].timeofday}\n`)
+                    }
+                }  
+            })    
+        }
+
+
+
+    }
+}
+
 function notifyAssignments(){
 
     let users = []; //array of users to notify
@@ -92,7 +248,7 @@ function notifyAssignments(){
             let courseIDs = [];
             let uid = users[i].substring(2).slice(0, -1);
             let courses = helper.getUserCourses(uid);
-            
+            console.log(uid)
             for (key in courses){
                 courseIDs.push(key);
                 ///console.log(key);
