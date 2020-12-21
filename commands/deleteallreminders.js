@@ -19,7 +19,7 @@ module.exports = {
             if(fs.existsSync('./usersToNotify.json')){
                 const data2 = JSON.parse(fs.readFileSync('usersToNotify.json'));
                 let users = [];
-                let content = [];
+                let content = {};
                 for(key in data2){
                     if(key.substring(2).slice(0, -1)==message.author.id){
                         console.log(message.author.id);
